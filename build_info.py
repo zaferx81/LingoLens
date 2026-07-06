@@ -1,0 +1,4 @@
+BUILD_NAME = "LingoLens"
+BUILD_VERSION = "1.0.0"
+BUILD_CHANNEL = "stable"
+BUILD_DATE = "2026-07-01"

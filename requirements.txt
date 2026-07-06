@@ -1,0 +1,9 @@
+keyboard
+customtkinter
+pyperclip
+pytesseract
+pillow
+pyautogui
+argostranslate
+requests
+pystray
