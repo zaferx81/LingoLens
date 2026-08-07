@@ -33,7 +33,9 @@ F7_LAST_TARGET_LANGUAGE = app_settings.get(
 
 
 def fix_turkish_input(text):
-    text = text.strip().lower()
+    import re
+
+    text = text.strip()
 
     sentence_fixes = {
         "merhaba arkadaşım nasılsın": "merhaba arkadaşım, nasılsın?",
@@ -42,21 +44,28 @@ def fix_turkish_input(text):
         "sa arkadaşım nasılsın": "merhaba arkadaşım, nasılsın?",
     }
 
-    if text in sentence_fixes:
-        return sentence_fixes[text]
+    lowered_text = text.lower()
+
+    if lowered_text in sentence_fixes:
+        return sentence_fixes[lowered_text]
 
     word_fixes = {
-        "nasılsın": "nasılsın?",
+        "nasilsin": "nasılsın",
         "naber": "nasılsın?",
         "nbr": "nasılsın?",
         "selam": "merhaba",
         "sa": "merhaba",
-        "arkadasım": "arkadaşım",
         "arkadasim": "arkadaşım",
+        "arkadasım": "arkadaşım",
     }
 
     for wrong, correct in word_fixes.items():
-        text = text.replace(wrong, correct)
+        text = re.sub(
+            rf"\b{re.escape(wrong)}\b",
+            correct,
+            text,
+            flags=re.IGNORECASE
+        )
 
     return text
 
@@ -259,8 +268,6 @@ def open_write_translate_window():
         if text == placeholder_text:
             text = ""
 
-        text = fix_turkish_input(text)
-
         if not text:
             status_label.configure(text="Önce bir metin yaz ✍️")
             return "break"
@@ -271,8 +278,8 @@ def open_write_translate_window():
         from_code = LANGUAGES[source_name]
         to_code = LANGUAGES[target_name]
 
-        global F6_LAST_SOURCE_LANGUAGE
-        global F6_LAST_TARGET_LANGUAGE
+        if from_code == "tr":
+            text = fix_turkish_input(text)
 
         F6_LAST_SOURCE_LANGUAGE = source_name
         F6_LAST_TARGET_LANGUAGE = target_name
@@ -316,7 +323,7 @@ def open_write_translate_window():
     win = ctk.CTk()
     win.title("LingoLens")
     win.attributes("-topmost", True)
-    win.geometry("520x360+150+150")
+    win.geometry("520x450+150+150")
     win.resizable(False, False)
 
     main_frame = ctk.CTkFrame(win, corner_radius=18)
@@ -333,13 +340,25 @@ def open_write_translate_window():
     )
     subtitle.pack(pady=(0, 16))
 
+    status_label = ctk.CTkLabel(
+        main_frame,
+        text="",
+        font=("Segoe UI", 10),
+        text_color="#9CA3AF"
+    )
+    status_label.pack(pady=(0, 8))
+
     lang_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
     lang_frame.pack(pady=(0, 10))
 
     source_block = ctk.CTkFrame(lang_frame, fg_color="transparent")
     source_block.grid(row=0, column=0, padx=(0, 10))
 
-    source_label = ctk.CTkLabel(source_block, text="Kaynak Dil", font=("Segoe UI", 10, "bold"))
+    source_label = ctk.CTkLabel(
+        source_block,
+        text="Kaynak Dil",
+        font=("Segoe UI", 10)
+    )
     source_label.pack(anchor="w", pady=(0, 4))
 
     source_combo = ctk.CTkComboBox(
@@ -350,7 +369,7 @@ def open_write_translate_window():
         corner_radius=8,
         state="readonly"
     )
-    source_combo.set(DEFAULT_SOURCE_LANGUAGE)
+    source_combo.set(F6_LAST_SOURCE_LANGUAGE)
     source_combo.pack()
 
     swap_btn = ctk.CTkButton(
@@ -396,119 +415,17 @@ def open_write_translate_window():
         corner_radius=10,
         font=("Segoe UI", 12, "bold")
     )
-    translate_btn.pack(pady=(0, 10))
+    translate_btn.pack(pady=(4, 0))
 
-    bottom_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-    bottom_frame.pack(fill="x", padx=18, pady=(0, 8))
-
-    status_label = ctk.CTkLabel(
-        bottom_frame,
-        text="Enter = Çevir",
-        font=("Segoe UI", 10),
-        text_color="#9CA3AF"
-    )
-    status_label.pack(side="left")
-
-    close_label = ctk.CTkLabel(
-        bottom_frame,
-        text="Esc = Kapat",
-        font=("Segoe UI", 10),
-        text_color="#9CA3AF"
-    )
-    close_label.pack(side="right")
-
-    input_box.bind("<Return>", translate_and_copy)
     win.bind("<Escape>", close_window)
-
     input_box.focus()
     win.mainloop()
-
-
-def choose_f7_target_language():
-    global F7_LAST_TARGET_LANGUAGE
-
-    selected = {"target": F7_LAST_TARGET_LANGUAGE}
-
-    def start():
-        global F7_LAST_TARGET_LANGUAGE
-
-        selected["target"] = target_combo.get()
-        F7_LAST_TARGET_LANGUAGE = selected["target"]
-
-        app_settings["f7_target_language"] = F7_LAST_TARGET_LANGUAGE
-        save_settings(app_settings)
-
-        win.destroy()
-
-    def close_window(event=None):
-        win.destroy()
-        return "break"
     
-    win = ctk.CTk()
-    win.title("LingoLens OCR")
-    win.attributes("-topmost", True)
-    win.geometry("380x250+200+180")
-    win.resizable(False, False)
-
-    main_frame = ctk.CTkFrame(win, corner_radius=18)
-    main_frame.pack(fill="both", expand=True, padx=16, pady=16)
-
-    title = ctk.CTkLabel(main_frame, text="LingoLens OCR", font=("Segoe UI", 24, "bold"))
-    title.pack(pady=(20, 4))
-
-    subtitle = ctk.CTkLabel(
-        main_frame,
-        text="Ekrandan yazıyı seç ve çevir",
-        font=("Segoe UI", 11),
-        text_color="#9CA3AF"
-    )
-    subtitle.pack(pady=(0, 18))
-
-    label = ctk.CTkLabel(main_frame, text="Hedef Dil", font=("Segoe UI", 11, "bold"))
-    label.pack(pady=(0, 5))
-
-    target_combo = ctk.CTkComboBox(
-        main_frame,
-        values=list(LANGUAGES.keys()),
-        width=220,
-        height=34,
-        corner_radius=8,
-        state="readonly"
-    )
-    target_combo.set(F7_LAST_TARGET_LANGUAGE)
-    target_combo.pack(pady=(0, 18))
-
-    start_btn = ctk.CTkButton(
-        main_frame,
-        text="OCR Başlat",
-        command=start,
-        width=180,
-        height=36,
-        corner_radius=10,
-        font=("Segoe UI", 12, "bold")
-    )
-    start_btn.pack()
-
-    info_label = ctk.CTkLabel(
-        main_frame,
-        text="ESC = Kapat",
-        font=("Segoe UI", 10),
-        text_color="#9CA3AF"
-    )
-    info_label.pack(pady=(16, 0))
-
-    win.bind("<Escape>", close_window)
-    win.mainloop()
-
-    return selected["target"]
 
 
 def select_area_and_ocr_translate():
-    target_name = choose_f7_target_language()
-    target_code = LANGUAGES[target_name]
-    
-    import time
-    time.sleep(0.3)
+    target_name = "Turkish"
+    target_code = "tr"
 
     frozen_image = pyautogui.screenshot()
 

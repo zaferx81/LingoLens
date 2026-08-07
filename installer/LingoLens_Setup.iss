@@ -1,8 +1,8 @@
 #define MyAppName "LingoLens"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.2"
 #define MyAppPublisher "Zafer Software"
 #define MyAppExeName "LingoLens.exe"
-#define MyAppURL "https://lingolens.app"
+#define MyAppURL "https://github.com/zaferx81/LingoLens"
 
 [Setup]
 AppId={{A9F0E2B8-8D6B-4A9D-9F9A-100010001000}
@@ -15,7 +15,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir=C:\LingoLens\release
-OutputBaseFilename=LingoLens_Setup_v1.0.0
+OutputBaseFilename=LingoLens_Setup
 SetupIconFile=C:\LingoLens\assets\logo\LingoLens.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma

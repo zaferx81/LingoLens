@@ -1,5 +1,5 @@
 {
-    "version": "1.1.1",
-    "download_url": "https://github.com/zaferx81/LingoLens/releases/latest/download/LingoLens_Setup.exe",
-    "notes": "Otomatik güncelleme adresi düzeltildi."
+  "version": "1.1.2",
+  "download_url": "https://github.com/zaferx81/LingoLens/releases/latest/download/LingoLens_Setup.exe",
+  "notes": "F6 ve F7 sorunları düzeltildi. Türkçe ve İngilizce çeviri kararlılığı iyileştirildi."
 }
